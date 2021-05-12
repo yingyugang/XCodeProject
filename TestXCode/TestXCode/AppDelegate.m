@@ -18,6 +18,8 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     NSLog(@"%s","didFinishLaunchingWithOptions");
+    
+    /*
     NSDictionary *remoteNotif = [launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
     AppDelegate *appDel = (AppDelegate*)[UIApplication sharedApplication].delegate;
     if (remoteNotif) {
@@ -28,7 +30,6 @@
     }else{
         appDel.info = @"xxxxxx";
     }
-    /*
     [self registerRemoteNotifications];
      */
     
@@ -53,6 +54,12 @@
     NSString* token = [self fetchDeviceToken:deviceToken];
     NSLog(@"%@",token);
     [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+    
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",@"http://192.168.10.100:8080/getDeviceToken?deviceToken=",token]];
+    NSData *data = [NSData dataWithContentsOfURL:url];
+    NSString *ret = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    NSLog(@"ret=%@", ret);
+    
 }
 
 - (void)application:(UIApplication *)application
@@ -75,10 +82,6 @@
     NSData *infoData = [NSJSONSerialization dataWithJSONObject:notification.request.content.userInfo options:0 error:nil];
     AppDelegate *appDel = (AppDelegate*)[UIApplication sharedApplication].delegate;
     appDel.info = [[NSString alloc] initWithData:infoData encoding:NSUTF8StringEncoding];
-    
-    
-    
- 
     //appDel.info = notification.request.content.userInfo.;
     [self.viewController alert];
 }
@@ -98,7 +101,6 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     [self.viewController alert];
 }
 
-
 - (NSString *)fetchDeviceToken:(NSData *)deviceToken {
     NSUInteger len = deviceToken.length;
     if (len == 0) {
@@ -111,27 +113,6 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     }
     return [hexString copy];
 }
-
-- (void)registerRemoteNotifications {
-    // iOS8 or later
-    if ([[UIApplication sharedApplication] respondsToSelector:@selector(registerForRemoteNotifications)]) {
-        UIUserNotificationType types = (UIUserNotificationType) (UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationTypeAlert);
-        UIUserNotificationSettings *mySettings = [UIUserNotificationSettings settingsForTypes:types categories:nil];
-        [[UIApplication sharedApplication] registerUserNotificationSettings:mySettings];
-    } else {
-        UIRemoteNotificationType types = UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound;
-        [[UIApplication sharedApplication] registerForRemoteNotificationTypes:types];
-    }
-}
-
-- (void)application:(UIApplication *)application didRegisterUserNotificationSettings:(nonnull UIUserNotificationSettings *)notificationSettings {
-    // Register for remote notifications.
-    [[UIApplication sharedApplication] registerForRemoteNotifications];
-}
-
-
-
-
 
 #pragma mark - UISceneSession lifecycle
 
